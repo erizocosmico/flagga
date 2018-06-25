@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+
+	"github.com/BurntSushi/toml"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // Source provides values for the flags.
@@ -41,33 +44,58 @@ func (e envSource) Get(key string, dst Value) (bool, error) {
 	return true, nil
 }
 
+type fileSource struct {
+	file   string
+	parser func([]byte, interface{}) error
+	value  map[string]interface{}
+}
+
 type jsonSource struct {
-	file string
-	json map[string]interface{}
+	fileSource
+}
+
+type yamlSource struct {
+	fileSource
+}
+
+type tomlSource struct {
+	fileSource
 }
 
 // JSONVia returns a Source that will use a JSON file as a provider of
 // flag values.
 func JSONVia(file string) Source {
-	return &jsonSource{file, nil}
+	return &jsonSource{fileSource{file, json.Unmarshal, nil}}
 }
 
-func (s *jsonSource) Open() error {
+// YAMLVia returns a Source that will use a YAML file as a provider of
+// flag values.
+func YAMLVia(file string) Source {
+	return &yamlSource{fileSource{file, yaml.Unmarshal, nil}}
+}
+
+// TOMLVia returns a Source that will use a TOML file as a provider of
+// flag values.
+func TOMLVia(file string) Source {
+	return &tomlSource{fileSource{file, toml.Unmarshal, nil}}
+}
+
+func (s *fileSource) Open() error {
 	var err error
 	content, err := ioutil.ReadFile(s.file)
 	if err != nil {
 		return err
 	}
 
-	return json.Unmarshal(content, &s.json)
+	return s.parser(content, &s.value)
 }
 
-func (s *jsonSource) Close() error {
+func (s *fileSource) Close() error {
 	return nil
 }
 
-func (s *jsonSource) Get(key string, dst Value) (bool, error) {
-	val, ok := s.json[key]
+func (s *fileSource) Get(key string, dst Value) (bool, error) {
+	val, ok := s.value[key]
 	if !ok {
 		return false, nil
 	}

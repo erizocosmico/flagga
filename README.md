@@ -4,17 +4,7 @@
 
 This idea and API come from [Peter Bourgon's *Go for Industrial Programming*](http://peter.bourgon.org/go-for-industrial-programming/#program-configuration) talk at Gophercon Iceland 2018.
 
-## Status
-
-Work in Progress. The library is missing functionality and tests at the moment. The public API may change.
-
-### TODO
-
-- Tests for `FlagSet`.
-- Usage text generation.
-- Automatic `help` flag detection.
-- YAML `Extractor` and `Source`.
-- TOML `Extractor` and `Source`.
+It should work as a drop-in replacement for the standard library `flag` package. The only difference is the fact that `NewFlagSet` and `Init` accept a second string for the description.
 
 ## Goals
 
@@ -61,6 +51,20 @@ MYAPP_DBURI=user@localhost:1234/foo ./myprogram
 CLI flags **always** have priority over environment variables or JSON keys. If a flag is provided using the command line flags, no other sources will be checked for that variable.
 
 The rest of the priorities depend of the order in which the sources are passed to the `Parse` method. For example, `fs.Parse(os.Args, flagga.EnvPrefix("FOO_"), flagga.JSONVia("cfg"))` gives more priority to environment variables than to the JSON configuration.
+
+### Available `Extractor`s
+
+- `Env`: from environment variable sources.
+- `JSON`: from JSON sources.
+- `YAML`: from YAML sources.
+- `TOML`: from TOML sources.
+
+### Available `Source`s
+
+- `EnvPrefix`: provides all environment variables matching the given prefix.
+- `JSONVia`: provides the content of the JSON in the given file.
+- `YAMLVia`: provides the content of the YAML in the given file.
+- `TOMLVia`: provides the content of the TOML in the given file.
 
 ## Custom `Source`s and `Extractor`s
 
