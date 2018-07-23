@@ -10,7 +10,8 @@ It should work as a drop-in replacement for the standard library `flag` package.
 
 - Be able to configure a program with different sources that have different priorities.
 - Be extensible so anyone can extend the API to provide different sources to get their configuration from (yaml, toml, database?, ...).
-- Provide as much functionality as the Go standard `flag` package.
+- Be a drop-in replacement for the Go standard `flag` package with extra features.
+- Have no third-party dependencies.
 
 ## Install
 
@@ -56,15 +57,15 @@ The rest of the priorities depend of the order in which the sources are passed t
 
 - `Env`: from environment variable sources.
 - `JSON`: from JSON sources.
-- `YAML`: from YAML sources.
-- `TOML`: from TOML sources.
+
+YAML and TOML extractors are available in the [flaggax](https://github.com/erizocosmico/flaggax) repository.
 
 ### Available `Source`s
 
 - `EnvPrefix`: provides all environment variables matching the given prefix.
 - `JSONVia`: provides the content of the JSON in the given file.
-- `YAMLVia`: provides the content of the YAML in the given file.
-- `TOMLVia`: provides the content of the TOML in the given file.
+
+YAML and TOML sources are available in the [flaggax](https://github.com/erizocosmico/flaggax) repository.
 
 ## Custom `Source`s and `Extractor`s
 

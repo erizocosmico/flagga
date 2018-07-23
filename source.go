@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
-
-	"github.com/BurntSushi/toml"
-	yaml "gopkg.in/yaml.v2"
 )
 
 // Source provides values for the flags.
@@ -44,58 +41,53 @@ func (e envSource) Get(key string, dst Value) (bool, error) {
 	return true, nil
 }
 
-type fileSource struct {
-	file   string
-	parser func([]byte, interface{}) error
-	value  map[string]interface{}
+// FileSource is a Source that reads a file and parses it using a parser
+// function.
+type FileSource struct {
+	File   string
+	Parser ParseFunc
+	Value  map[string]interface{}
+}
+
+// ParseFunc is a function that will parse the given data and put the
+// result into the given destination.
+type ParseFunc func(data []byte, dst interface{}) error
+
+// NewFileSource returns a Source that will read the given file and use the
+// given parser to extract the contents of it.
+func NewFileSource(file string, parser ParseFunc) Source {
+	return &FileSource{file, parser, nil}
 }
 
 type jsonSource struct {
-	fileSource
-}
-
-type yamlSource struct {
-	fileSource
-}
-
-type tomlSource struct {
-	fileSource
+	Source
 }
 
 // JSONVia returns a Source that will use a JSON file as a provider of
 // flag values.
 func JSONVia(file string) Source {
-	return &jsonSource{fileSource{file, json.Unmarshal, nil}}
+	return &jsonSource{NewFileSource(file, json.Unmarshal)}
 }
 
-// YAMLVia returns a Source that will use a YAML file as a provider of
-// flag values.
-func YAMLVia(file string) Source {
-	return &yamlSource{fileSource{file, yaml.Unmarshal, nil}}
-}
-
-// TOMLVia returns a Source that will use a TOML file as a provider of
-// flag values.
-func TOMLVia(file string) Source {
-	return &tomlSource{fileSource{file, toml.Unmarshal, nil}}
-}
-
-func (s *fileSource) Open() error {
+// Open implements the Source interface.
+func (s *FileSource) Open() error {
 	var err error
-	content, err := ioutil.ReadFile(s.file)
+	content, err := ioutil.ReadFile(s.File)
 	if err != nil {
 		return err
 	}
 
-	return s.parser(content, &s.value)
+	return s.Parser(content, &s.Value)
 }
 
-func (s *fileSource) Close() error {
+// Close implements the Source interface.
+func (s *FileSource) Close() error {
 	return nil
 }
 
-func (s *fileSource) Get(key string, dst Value) (bool, error) {
-	val, ok := s.value[key]
+// Get implements the Source interface.
+func (s *FileSource) Get(key string, dst Value) (bool, error) {
+	val, ok := s.Value[key]
 	if !ok {
 		return false, nil
 	}

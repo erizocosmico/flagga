@@ -54,7 +54,7 @@ func TestJSON(t *testing.T) {
 	}
 
 	sources := []Source{
-		&jsonSource{fileSource{value: map[string]interface{}{
+		&jsonSource{&FileSource{Value: map[string]interface{}{
 			"bar": int64(42),
 			"baz": float64(3.14),
 		}}},
@@ -63,92 +63,6 @@ func TestJSON(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.key, func(t *testing.T) {
 			ok, err := JSON(tt.key).Get(sources, NewValue(tt.value))
-			if tt.err && err == nil {
-				t.Errorf("expecting error, got nil instead")
-			} else if !tt.err && err != nil {
-				t.Errorf("got unexpected error: %s", err)
-			}
-
-			if tt.ok != ok {
-				t.Errorf("expected ok to be: %v, got: %v", tt.ok, ok)
-			}
-
-			if tt.ok {
-				val := reflect.ValueOf(tt.value).Elem().Interface()
-				if !reflect.DeepEqual(val, tt.expected) {
-					t.Errorf("expecting value to be: %v, got: %v", tt.expected, val)
-				}
-			}
-		})
-	}
-}
-
-func TestTOML(t *testing.T) {
-	testCases := []struct {
-		key      string
-		err      bool
-		ok       bool
-		value    interface{}
-		expected interface{}
-	}{
-		{"foo", false, false, nil, nil},
-		{"bar", false, true, new(int64), int64(42)},
-		{"baz", true, false, new(bool), nil},
-	}
-
-	sources := []Source{
-		&tomlSource{fileSource{value: map[string]interface{}{
-			"bar": int64(42),
-			"baz": float64(3.14),
-		}}},
-	}
-
-	for _, tt := range testCases {
-		t.Run(tt.key, func(t *testing.T) {
-			ok, err := TOML(tt.key).Get(sources, NewValue(tt.value))
-			if tt.err && err == nil {
-				t.Errorf("expecting error, got nil instead")
-			} else if !tt.err && err != nil {
-				t.Errorf("got unexpected error: %s", err)
-			}
-
-			if tt.ok != ok {
-				t.Errorf("expected ok to be: %v, got: %v", tt.ok, ok)
-			}
-
-			if tt.ok {
-				val := reflect.ValueOf(tt.value).Elem().Interface()
-				if !reflect.DeepEqual(val, tt.expected) {
-					t.Errorf("expecting value to be: %v, got: %v", tt.expected, val)
-				}
-			}
-		})
-	}
-}
-
-func TestYAML(t *testing.T) {
-	testCases := []struct {
-		key      string
-		err      bool
-		ok       bool
-		value    interface{}
-		expected interface{}
-	}{
-		{"foo", false, false, nil, nil},
-		{"bar", false, true, new(int64), int64(42)},
-		{"baz", true, false, new(bool), nil},
-	}
-
-	sources := []Source{
-		&yamlSource{fileSource{value: map[string]interface{}{
-			"bar": int64(42),
-			"baz": float64(3.14),
-		}}},
-	}
-
-	for _, tt := range testCases {
-		t.Run(tt.key, func(t *testing.T) {
-			ok, err := YAML(tt.key).Get(sources, NewValue(tt.value))
 			if tt.err && err == nil {
 				t.Errorf("expecting error, got nil instead")
 			} else if !tt.err && err != nil {
