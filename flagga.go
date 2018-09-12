@@ -170,7 +170,7 @@ func (fs *FlagSet) usage() {
 
 	if fs.description != "" {
 		fmt.Fprintf(
-			fs.out, "\n  %s\n",
+			fs.Output(), "\n  %s\n",
 			strings.Replace(fs.description, "\n", "\n  ", -1),
 		)
 	}
@@ -192,7 +192,7 @@ func (fs *FlagSet) PrintDefaults() {
 		fmt.Fprint(fs.Output(), "  \t")
 		if f.Usage != "" {
 			fmt.Fprint(
-				fs.out,
+				fs.Output(),
 				strings.Replace(f.Usage, "\n", "\n  \t", -1),
 			)
 		}
